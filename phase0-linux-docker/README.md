@@ -4,12 +4,14 @@
 
 ## 作業場所のルール
 
+理由は 2026-09-30 にこの PC の設定を見て決めた。設定が変わったら見直す。
+
 | 何を | どこで | なぜ |
 |---|---|---|
-| 課題の手を動かす部分 | Ubuntu の `~/lab/phase0/`（リポジトリの外・消してよい） | `/mnt/c` は権限（`chmod`）が保存されず、ファイル操作も遅い |
-| メモ・スクリプトの保管 | このリポジトリ（Windows 側 `C:/Miyoki/個人/smb-data-ops`） | 査読ゲート（pre-push）が Windows 側の git にだけ掛かっている |
-| git の commit / push | Windows 側（PowerShell か Claude Code） | 同上。Ubuntu の git から push するとゲートを通らない |
-| Docker のデータ | 名前付きボリューム（`docker volume`） | `/mnt/c` をマウントすると遅く、ファイル変更の通知も届かない |
+| 課題の手を動かす部分 | Ubuntu の `~/lab/phase0/`（リポジトリの外・消してよい） | この PC の `/mnt/c` は `metadata` オプション無しでマウントされている（`mount \| grep /mnt/c` で確認）＝`chmod` の結果が残らない |
+| メモ・スクリプトの保管 | このリポジトリ（Windows 側のフォルダ） | 査読ゲート（pre-push）の `core.hooksPath` は Windows 側の git にだけ設定してある |
+| git の commit / push | Windows 側（PowerShell か Claude Code） | 同上。Ubuntu 側の git には `core.hooksPath` を設定していない＝そこから push するとゲートを通らない |
+| Docker のデータ | 名前付きボリューム（`docker volume`） | Microsoft の WSL ドキュメントは、Linux のツールで扱うファイルは Linux 側に置くことを推奨している（性能のため） |
 
 ## 課題（上から順に）
 
@@ -23,7 +25,11 @@
 ### 2. パイプとテキスト処理
 
 - やること: `grep`・`sort`・`uniq -c`・`awk` を `|` でつなぐ
-- 判定: `journalctl --since today` の出力から、出現回数の多い上位5単語を1行のコマンドで出せる
+- 判定: 次の1行を、左から順に「各段で何が起きているか」を説明しながら打てる。出力は「回数 単語」が5行
+  ```bash
+  journalctl -u docker --since today --no-pager -o cat | tr -cs '[:alpha:]' '\n' | sort | uniq -c | sort -rn | head -5
+  ```
+  （権限のエラーが出たら `journalctl` の前に `sudo` を付ける。単語＝英字の連続）
 
 ### 3. プロセスとサービス
 
