@@ -27,7 +27,7 @@
 - やること: `grep`・`sort`・`uniq -c`・`awk` を `|` でつなぐ
 - 判定: 次の1行を、左から順に「各段で何が起きているか」を説明しながら打てる。出力は「回数 単語」が最大5行（当日のログの単語が5種類未満なら、その数だけ）
   ```bash
-  journalctl -u docker --since today --no-pager -o cat | LC_ALL=C tr -cs 'A-Za-z' '\n' | LC_ALL=C sort | uniq -c | sort -rn | head -5
+  journalctl -u docker --since today --no-pager -o cat | LC_ALL=C tr -cs 'A-Za-z' '\n' | LC_ALL=C sort | uniq -c | LC_ALL=C sort -rn | head -5
   ```
   （権限のエラーが出たら `journalctl` の前に `sudo` を付ける。単語＝半角英字 A〜Z・a〜z の連続。`LC_ALL=C` は言語設定による違いを無くすため）
 
