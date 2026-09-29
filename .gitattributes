@@ -1,0 +1,3 @@
+# Ubuntu（WSL）で動かすリポジトリなので、Windows 側の core.autocrlf=true に関係なく LF で展開する
+# （CRLF のシェルスクリプトは bash で `$'\r': command not found` になる）
+* text=auto eol=lf
