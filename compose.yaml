@@ -1,0 +1,18 @@
+# 手元のフォルダ名（旧名 smb-data-ops）ではなく、リポジトリ名でイメージとコンテナに名前を付ける
+name: data-ml-lab
+
+services:
+  app:
+    build: .
+    # キーは環境変数ではなくファイルで渡す（環境変数は docker inspect で見えてしまう）
+    secrets:
+      - jquants_env
+
+  # キーを持たないテスト用。固定の応答で動くので API を呼ばない
+  test:
+    build: .
+    command: ["python", "-m", "unittest", "-v"]
+
+secrets:
+  jquants_env:
+    file: ${HOME}/.secrets/jquants.env
