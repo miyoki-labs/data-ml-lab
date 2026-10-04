@@ -67,7 +67,7 @@ Phase0（2026-10-01〜）で学んだこと。手を動かす場所は `~/lab/ph
 | `systemctl status docker` | サービスの状態。`Loaded:` 行と `Active:` 行を見る |
 | `systemctl is-active docker` | **今**動いているか（`active`） |
 | `systemctl is-enabled docker` | **起動したら**自動で動くか（`enabled`） |
-| `journalctl -u docker` | そのサービスのログ（`--no-pager`＝全部流す、`-o cat`＝本文だけ） |
+| `journalctl -u docker` | そのサービスのログ（`--no-pager`＝`less` のようなページャーを使わずに出す、`-o cat`＝本文だけ。どこまでの範囲が出るかは `--since` などの指定とログの保存状況による） |
 
 - PID 1 の `/sbin/init`＝Ubuntu の中で最初に起動した親玉（systemd）。`systemctl` はこれに聞いている
 

@@ -38,7 +38,7 @@
 | `origin/main`（教材では `o/main`） | 「**最後に GitHub を見たとき**、main はここだった」というメモ。GitHub と通信したときにしか動かない |
 | `git clone` | GitHub の中身を手元に丸ごとコピーし、つながりも作る |
 | `git fetch` | GitHub を見に行って、**メモだけ**更新する。自分の main は動かさない |
-| `git pull` | fetch ＋ merge |
+| `git pull` | 既定の設定では fetch ＋ merge（`pull.rebase=true` などの設定や `--rebase` の指定があれば fetch ＋ rebase） |
 | `git pull --rebase` | fetch ＋ rebase（一本道にする） |
 | `git push` | 自分のコミットを GitHub へ送る |
 | `git fetch --prune` | GitHub でもう消えたブランチのメモを掃除する |
