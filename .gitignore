@@ -17,3 +17,6 @@ Thumbs.db
 
 # 取得した生データ（J-Quants の規約で配布禁止）
 data/
+
+# Obsidian の設定（notes/ を保管庫として開いたときにできる）
+.obsidian/
