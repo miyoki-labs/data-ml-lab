@@ -7,6 +7,7 @@
 - [linux.md](linux.md) — Linux（ファイル・権限・パイプ・プロセス・定期実行）
 - [git.md](git.md) — Git・GitHub（コミット・ブランチ・リモート・PR）
 - [docker.md](docker.md) — Docker（イメージ・コンテナ）
+- [sql.md](sql.md) — SQL（SQL Server を Docker で立てる・MySQL との違い）
 - [materials.md](materials.md) — 教材リスト（資格の勉強と作業を兼ねられるもの。この1つだけは「用語・つまずき・使い道」ではなく教材の一覧）
 
 ## 書き方
