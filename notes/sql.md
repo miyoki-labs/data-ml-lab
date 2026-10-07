@@ -40,7 +40,11 @@ alias sq='docker exec -i mssql bash -c "/opt/mssql-tools18/bin/sqlcmd -S localho
 | 日付 | 最初の理解 | 正しい理解 |
 |---|---|---|
 | 10/7 | alias の中で `bin\sqlcmd` と打ったら `binsqlcmd: no such file` | alias の中身は使うときにもう一度シェルが読み直す。そのとき `\s` の `\` は消費されて消える。長いコマンドは手で打たずにコピーし、`alias sq` で中身を確かめる |
-| 10/7 | `Login failed for user 'sa'` が続く＝何が悪いか分からない | 画面のエラーは「失敗した」だけ。理由はサーバー側のログにある＝`docker logs mssql 2>&1 \| grep "Login failed"` の `Reason:`。今回はコンテナが覚えているパスワードを使う形に変えたら通った＝打ち直した値が違っていた可能性が高い（⚠️ `Reason:` の行そのものは見ていない） |
+| 10/7 | `Login failed for user 'sa'` が続く＝何が悪いか分からない | 画面のエラーは「失敗した」だけ。理由はサーバー側のログにある（表の下のコマンドの `Reason:`）。今回はコンテナが覚えているパスワードを使う形に変えたら通った＝打ち直した値が違っていた可能性が高い（⚠️ `Reason:` の行そのものは見ていない） |
+
+```bash
+docker logs mssql 2>&1 | grep "Login failed" | tail -2
+```
 
 ## 使い道
 
