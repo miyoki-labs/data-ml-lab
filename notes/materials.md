@@ -40,6 +40,12 @@
 
 - 無料の練習問題は20問だけ＝試験範囲を全部はカバーしない。「穴を見つける道具」として使う
 
+### 公式の練習問題の開き方（2026-10-06 確認）
+
+- URL＝https://skillbuilder.aws/learn/4URFGY63KV/official-practice-question-set-aws-certified-ai-practitioner--aifc01--english/FVG43Y1PAX
+- AWS Builder ID でサインイン → 言語の欄の「English ＋9 more」→「日本語」。無料・20問
+- 解き方＝答えを見る前に、選んだ理由を一言で言ってみる。間違えたら「知らなかった」か「読み違えた」かを分けて覚える
+
 ### 使わないもの
 
 - 「本番の問題」をうたう問題集サイト（問題を流出させたもの）。試験の規約に反するおそれがある。公式と出版社の本を使う
