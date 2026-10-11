@@ -16,6 +16,7 @@
 | 教材 | 中身 | 使い道 |
 |---|---|---|
 | 公式の練習問題（AIF-C01・日本語版。AWS Skill Builder） | AWS が作った本番形式の問題20問・選択肢ごとの解説つき | 受験前の力試し |
+| Standard Exam Prep Plan（AIF-C01・日本語版あり。AWS Skill Builder） | 試験の5分野に沿った講座のまとめ（検索結果では約18時間）。最初は Domain 1 Review | 練習問題で見つかった穴を埋める（10/10 から。https://explore.skillbuilder.aws/learn/public/learning_plan/view/2193/standard-exam-prep-plan-aws-certified-ai-practitioner-aif-c01） |
 | AWS の無料枠（新規アカウント） | 登録で 100 USD のクレジット＋指定の作業（Bedrock で1回プロンプトを送るなど）で最大 100 USD 追加。無料プランは作った日から**6か月**かクレジットを使い切るまで | Bedrock で Claude を動かして、基盤モデルの使い方を手で確かめる |
 
 ### 有料

@@ -70,6 +70,8 @@
 | 10/4 | C4 に checkout すれば C5' の下にコミットできる | checkout は**立ち位置を動かすだけ**でコミットは動かない。コミットを置き直すのは rebase か cherry-pick |
 | 10/4 | 擬似的なチーム作業は、先に GitHub が進んでから clone する | 先に clone → GitHub が進む → 自分も進む → 取り込んで合流。C4 が C1 から枝分かれしている＝C4 を作ったとき C2・C3 を知らなかった |
 | 10/4 | 赤いブランチは問題がある？ | 赤は GitHub 側のメモの色。警告ではない |
+| 10/10 | 1週間空いたら `-f` と `-b` が何だったか分からなくなった | `-f`＝force（強制）。`branch -f` は手元の名札を動かすだけ（安全）、`push -f` は GitHub の履歴を上書き（危険）。`checkout -b 枝`＝枝を作って移る（b＝branch。`switch -c` も同じ） |
+| 10/10 | 同じ箇所を編集していたら、あとから rebase したほうに上書きされる？ | 上書きされない。同じ行がぶつかると rebase が**止まる**（コンフリクト）。`<<<<<<<` と `>>>>>>>` の間を直して `git add` → `git rebase --continue`、やめるなら `--abort`。Learn Git Branching はファイルの中身を持たないので起きない |
 | 9/30 | `git update-index --chmod=+x` のあと pathspec 付きで commit すれば実行権限が入る | pathspec 付きの commit は HEAD から取り直すので落ちる。`git commit -i -- <file>` を使い、`git ls-tree HEAD` で**commit の中身**を確かめる |
 
 ## 使い道

@@ -1,6 +1,6 @@
 # SQL
 
-Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MySQL（XAMPP）との違いを試したこと。
+Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MySQL（XAMPP）との違いを試したこと。10/11 に `WHERE`・`ORDER BY`・`GROUP BY`・`INSERT`・`UPDATE`。
 
 ## 用語・コマンド
 
@@ -13,6 +13,19 @@ Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MyS
 | `SELECT 1;` | 表が無くても返る、いちばん小さな SQL。返れば「動いている・つながる・ログインできる」を一度に確かめられる |
 | `-d lab` | DB `lab` の中で実行する |
 | `docker start mssql` | 止まったコンテナを、同じ中身のまま起こす（データも残る） |
+
+### 書く順番と、行を足す・直す（10/11）
+
+**SELECT → FROM → WHERE → GROUP BY → ORDER BY**＝「決めて、出して、除いて、まとめて、並べる」（料理：何を作るか決める → 冷蔵庫から出す → 傷んだのを除く → 種類ごとにまとめる → 皿に並べる）。入れ替えるとエラーになる。⚠️ 実際に処理される順番は FROM → WHERE → GROUP BY → SELECT → ORDER BY で、書く順とは違う。
+
+| 書き方 | 一言でいうと |
+|---|---|
+| `WHERE minutes > 30` | 条件に合う行だけ残す。`>` はより大きい（30 は入らない）、`>=` は以上（30 も入る） |
+| `ORDER BY study_date DESC` | 並べ替える。`DESC`＝大きい順・新しい順、付けなければ小さい順 |
+| `GROUP BY study_date` ＋ `SUM(minutes) AS total` | 同じ日付の行を1つにまとめて合計する。`AS`＝結果の列に付ける別名 |
+| `INSERT INTO study_log VALUES (5, '2026-10-08', 60), (...)` | 行を足す。カンマで区切れば何行でも |
+| `UPDATE study_log SET minutes = 45 WHERE id = 4` | 行を書き換える。**WHERE を忘れると全部の行が変わる** |
+| `sq -d lab -Q "..."` | `-d`＝使う DB（database）、`-Q`＝この SQL を実行して終わる（小文字の `-q` は実行後も残る） |
 
 ### MySQL（XAMPP）との違い
 
@@ -40,6 +53,8 @@ alias sq='docker exec -i mssql bash -c "/opt/mssql-tools18/bin/sqlcmd -S localho
 | 日付 | 最初の理解 | 正しい理解 |
 |---|---|---|
 | 10/7 | alias の中で `bin\sqlcmd` と打ったら `binsqlcmd: no such file` | alias の中身は使うときにもう一度シェルが読み直す。そのとき `\s` の `\` は消費されて消える。長いコマンドは手で打たずにコピーし、`alias sq` で中身を確かめる |
+| 10/11 | 「30分より長い日を、日付の新しい順に」を `WHERE minutes >= 30 ORDER BY minutes DESC` と書いた | SQL の形は正しい。お題の読み取りが2か所違った＝「より長い」は `>`、「日付の新しい順」は `ORDER BY study_date DESC` |
+| 10/11 | `-d` と `-Q` は「そういうもの」として打っていた | `sq` は別名で、中身は `sqlcmd -S localhost -U sa -P ... -C`。`-d lab`＝lab の中で、`-Q`＝この SQL を実行して終わる |
 | 10/7 | `Login failed for user 'sa'` が続く＝何が悪いか分からない | 画面のエラーは「失敗した」だけ。理由はサーバー側のログにある（表の下のコマンドの `Reason:`）。今回はコンテナが覚えているパスワードを使う形に変えたら通った＝打ち直した値が違っていた可能性が高い（⚠️ `Reason:` の行そのものは見ていない） |
 
 ```bash
