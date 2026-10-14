@@ -7,6 +7,8 @@ services:
     # キーは環境変数ではなくファイルで渡す（環境変数は docker inspect で見えてしまう）
     secrets:
       - jquants_env
+    volumes:
+      - ./data:/app/data
 
   # キーを持たないテスト用。固定の応答で動くので API を呼ばない
   test:

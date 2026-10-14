@@ -12,6 +12,14 @@ WSL の Ubuntu に `~/.secrets/jquants.env`（権限 600）を置き、`JQUANTS_
 docker compose run --rm app python -m collector.fetch_one <銘柄コード>
 ```
 
+CSV に保存する場合：
+
+```bash
+docker compose run --rm app python -m collector.fetch_one 25590 --save data/bars_25590.csv
+```
+
+保存したときは2行目に「saved 保存先 columns=列の数」が出る。列の名前は手元で `head -1 data/bars_25590.csv` で見る（`data/` は GitHub に上げない）。
+
 出力は「コード 件数 最初の日付 最後の日付」の1行。失敗時の終了コードは `collector/fetch_one.py` の `EXIT_*`。
 
 ## テスト（API を呼ばない）
