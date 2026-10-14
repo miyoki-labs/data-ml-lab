@@ -7,7 +7,10 @@
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import os
+from pathlib import Path
 import re
 import sys
 import urllib.error
@@ -160,18 +163,68 @@ def summarize(code: str, rows: list[dict]) -> str:
     return f"{code} {len(rows)} {dates[0]} {dates[-1]}"
 
 
+def resolve_save_path(path_text: str) -> Path:
+    current = Path.cwd().resolve()
+    data_root = (current / "data").resolve(strict=False)
+    target = (current / path_text).resolve(strict=False)
+    if data_root.parent != current or data_root not in target.parents:
+        raise FetchError(EXIT_USAGE, "保存先は data/ の下だけ")
+    return target
+
+
+def save_rows(target: Path, rows: list[dict]) -> list[str]:
+    normalized: list[dict[str, object]] = []
+    columns: list[str] = ["Date", "Code"]
+    for row in rows:
+        try:
+            item = {str(key): value for key, value in row.items()}
+            item["Date"] = normalize_date(row["Date"])
+        except (KeyError, TypeError):
+            raise FetchError(EXIT_OTHER, "応答に日付が無い") from None
+        normalized.append(item)
+        for column in item:
+            if column not in columns:
+                columns.append(column)
+
+    normalized.sort(key=lambda row: str(row["Date"]))
+    temporary: Path | None = None
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        temporary = target.with_name(f".{target.name}.tmp-{os.getpid()}")
+        with temporary.open("w", encoding="utf-8", newline="") as file:
+            writer = csv.DictWriter(file, fieldnames=columns, lineterminator="\n", extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(normalized)
+        os.replace(temporary, target)
+    except OSError as error:
+        if temporary is not None:
+            try:
+                temporary.unlink()
+            except OSError:
+                pass
+        raise FetchError(EXIT_OTHER, "保存に失敗した", cause=type(error).__name__) from None
+    return columns
+
+
 def main(argv: list[str] | None = None, get: HttpGet = http_get) -> int:
     try:
         parser = _Parser(description="J-Quants から1銘柄の日足を取得し、件数と期間を表示する")
         parser.add_argument("code", help="銘柄コード（5桁。例 25590）")
         parser.add_argument("--key-file", default=DEFAULT_KEY_FILE)
+        parser.add_argument("--save", metavar="PATH")
         args = parser.parse_args(argv)
         if not CODE_PATTERN.fullmatch(args.code):
             raise FetchError(EXIT_USAGE, "銘柄コードの形が正しくない")
 
+        # 取得の前に確かめる（拒否される保存先のために、回数制限のある API を呼ばない）
+        target = resolve_save_path(args.save) if args.save is not None else None
+
         key = read_key(args.key_file)
         rows = fetch_all(args.code, key, get)
         print(summarize(args.code, rows))
+        if target is not None:
+            columns = save_rows(target, rows)
+            print(f"saved {args.save} columns={','.join(columns)}")
         return EXIT_OK
     except FetchError as error:
         print(error.describe(), file=sys.stderr)
