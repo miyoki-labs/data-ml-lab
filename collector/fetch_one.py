@@ -196,7 +196,7 @@ def save_rows(target: Path, rows: list[dict]) -> list[str]:
             writer.writeheader()
             writer.writerows(normalized)
         os.replace(temporary, target)
-    except OSError as error:
+    except Exception as error:  # 文字の変換の失敗なども含めて、途中の一時ファイルを残さない
         if temporary is not None:
             try:
                 temporary.unlink()
@@ -224,7 +224,8 @@ def main(argv: list[str] | None = None, get: HttpGet = http_get) -> int:
         print(summarize(args.code, rows))
         if target is not None:
             columns = save_rows(target, rows)
-            print(f"saved {args.save} columns={','.join(columns)}")
+            # 列名は応答から来るので出さない。中身は手元で CSV の1行目を見る
+            print(f"saved {args.save} columns={len(columns)}")
         return EXIT_OK
     except FetchError as error:
         print(error.describe(), file=sys.stderr)

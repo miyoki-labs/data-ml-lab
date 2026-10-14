@@ -148,7 +148,7 @@ class FetchOneTest(unittest.TestCase):
                 ]))
                 status, out, _ = self.run_main(get, key_file=self.key_file, save="data/bars_25590.csv")
                 self.assertEqual(status, fetch_one.EXIT_OK)
-                self.assertEqual(out.splitlines()[1], "saved data/bars_25590.csv columns=Date,Code,O,H,L,C,Vo,Extra,Other")
+                self.assertEqual(out.splitlines()[1], "saved data/bars_25590.csv columns=9")
                 with open("data/bars_25590.csv", encoding="utf-8", newline="") as file:
                     content = file.read()
                 self.assertEqual(content.splitlines()[0], "Date,Code,O,H,L,C,Vo,Extra,Other")
@@ -182,6 +182,19 @@ class FetchOneTest(unittest.TestCase):
                 status, _, _ = self.run_main(FakeGet((500, b"")), key_file=self.key_file, save="data/bars_25590.csv")
                 self.assertEqual(status, fetch_one.EXIT_OTHER)
                 self.assertFalse(os.path.exists("data/bars_25590.csv"))
+            finally:
+                os.chdir(old_cwd)
+
+    def test_save_leaves_no_temporary_file_when_write_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            old_cwd = os.getcwd()
+            os.chdir(directory)
+            try:
+                broken = bar("20240104") | {"Note": "\ud800"}  # UTF-8 にできない文字＝書き込みの途中で失敗する
+                status, _, err = self.run_main(FakeGet(ok([broken])), key_file=self.key_file, save="data/bars_25590.csv")
+                self.assertEqual(status, fetch_one.EXIT_OTHER)
+                self.assertIn("保存に失敗した", err)
+                self.assertEqual(os.listdir("data"), [])
             finally:
                 os.chdir(old_cwd)
 
