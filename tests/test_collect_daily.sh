@@ -121,6 +121,10 @@ run_case invalid_line $'BAD!\n25590' 1
 assert_contains "$test_root/invalid_line.out" '^invalid line in collector/codes.txt$'
 assert_contains "$test_root/invalid_line.out" '^25590 fetched=0 inserted=1$'
 assert_not_contains "$test_root/invalid_line.out" 'BAD!'
+run_case only_invalid $'BAD!\n# ignored' 1
+assert_contains "$test_root/only_invalid.out" '^invalid line in collector/codes.txt$'
+assert_contains "$test_root/only_invalid.out" '^END exit=1$'
+assert_not_contains "$test_root/only_invalid.out" 'BAD!'
 run_case no_codes $'\n# ignored' 2
 assert_contains "$test_root/no_codes.out" '^no codes in collector/codes.txt$'
 

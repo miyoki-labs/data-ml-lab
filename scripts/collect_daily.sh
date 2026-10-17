@@ -68,6 +68,11 @@ done < collector/codes.txt
 
 if ((${#codes[@]} == 0)); then
   emit START
+  if ((invalid_lines > 0)); then
+    emit 'invalid line in collector/codes.txt'
+    emit 'END exit=1'
+    exit 1
+  fi
   emit 'no codes in collector/codes.txt'
   emit 'END exit=2'
   exit 2
