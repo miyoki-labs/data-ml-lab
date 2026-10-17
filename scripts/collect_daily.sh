@@ -17,7 +17,8 @@ emit() {
 }
 
 run_sql() {
-  local query=$1
+  # NOCOUNT＝「(N rows affected)」を出させない（数字だけを受け取るため）
+  local query="SET NOCOUNT ON; $1"
   local output status
   set +e
   output=$(docker exec mssql bash -c 'export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"; /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -d lab -b -h -1 -W -Q "$1"' bash "$query" 2>/dev/null)
@@ -53,14 +54,25 @@ if ((ready == 0)); then
 fi
 
 codes=()
+invalid_lines=0
 while IFS= read -r code || [[ -n $code ]]; do
   code=${code%$'\r'}
   [[ -z ${code//[[:space:]]/} || $code == \#* ]] && continue
-  codes+=("$code")
+  # fetch_one と同じ形だけ受け付ける（それ以外の文字列を画面やログに出さないため）
+  if [[ $code =~ ^[0-9A-Z]{4,5}$ ]]; then
+    codes+=("$code")
+  else
+    invalid_lines=$((invalid_lines + 1))
+  fi
 done < collector/codes.txt
 
 if ((${#codes[@]} == 0)); then
   emit START
+  if ((invalid_lines > 0)); then
+    emit 'invalid line in collector/codes.txt'
+    emit 'END exit=1'
+    exit 1
+  fi
   emit 'no codes in collector/codes.txt'
   emit 'END exit=2'
   exit 2
@@ -76,6 +88,10 @@ if ! run_sql "$schema_query" >/dev/null; then
 fi
 
 failed=0
+if ((invalid_lines > 0)); then
+  emit 'invalid line in collector/codes.txt'
+  failed=1
+fi
 first=1
 for code in "${codes[@]}"; do
   if ((first == 0)); then
@@ -107,6 +123,9 @@ for code in "${codes[@]}"; do
     inserted=${inserted//$'\r'/}
     inserted=${inserted//$'\n'/}
     inserted=${inserted//[[:space:]]/}
+    if ((load_status == 0)) && [[ ! $inserted =~ ^[0-9]+$ ]]; then
+      load_status=5
+    fi
   fi
   if ((load_status != 0)); then
     emit "$code FAILED stage=load exit=$load_status"
@@ -124,6 +143,11 @@ total=$(run_sql 'SELECT COUNT(*) FROM prices' 2>/dev/null) || {
 total=${total//$'\r'/}
 total=${total//$'\n'/}
 total=${total//[[:space:]]/}
+if [[ ! $total =~ ^[0-9]+$ ]]; then
+  emit 'mssql not ready'
+  emit 'END exit=3'
+  exit 3
+fi
 emit "total rows=$total"
 if ((failed != 0)); then
   emit 'END exit=1'
