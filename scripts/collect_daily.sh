@@ -17,7 +17,8 @@ emit() {
 }
 
 run_sql() {
-  local query=$1
+  # NOCOUNT＝「(N rows affected)」を出させない（数字だけを受け取るため）
+  local query="SET NOCOUNT ON; $1"
   local output status
   set +e
   output=$(docker exec mssql bash -c 'export SQLCMDPASSWORD="$MSSQL_SA_PASSWORD"; /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -C -d lab -b -h -1 -W -Q "$1"' bash "$query" 2>/dev/null)
@@ -107,6 +108,9 @@ for code in "${codes[@]}"; do
     inserted=${inserted//$'\r'/}
     inserted=${inserted//$'\n'/}
     inserted=${inserted//[[:space:]]/}
+    if ((load_status == 0)) && [[ ! $inserted =~ ^[0-9]+$ ]]; then
+      load_status=5
+    fi
   fi
   if ((load_status != 0)); then
     emit "$code FAILED stage=load exit=$load_status"
@@ -124,6 +128,11 @@ total=$(run_sql 'SELECT COUNT(*) FROM prices' 2>/dev/null) || {
 total=${total//$'\r'/}
 total=${total//$'\n'/}
 total=${total//[[:space:]]/}
+if [[ ! $total =~ ^[0-9]+$ ]]; then
+  emit 'mssql not ready'
+  emit 'END exit=3'
+  exit 3
+fi
 emit "total rows=$total"
 if ((failed != 0)); then
   emit 'END exit=1'

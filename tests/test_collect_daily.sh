@@ -42,6 +42,12 @@ case "$1" in
   exec)
     query=${*: -1}
     if [[ ${FAKE_READY:-1} == 0 ]]; then exit 1; fi
+    # 本物の sqlcmd と同じく、NOCOUNT が無ければ「(N rows affected)」を混ぜる
+    if [[ $query == 'SET NOCOUNT ON; '* ]]; then
+      query=${query#'SET NOCOUNT ON; '}
+    else
+      printf '(1 rows affected)\n'
+    fi
     if [[ $query == 'SELECT 1' ]]; then printf '1\n'; exit 0; fi
     if [[ ${FAKE_LOAD_FAIL:-0} == 1 && $query == *'BULK INSERT'* ]]; then exit 8; fi
     if [[ $query == *'COUNT(*)'* ]]; then printf '2\n'; else printf '1\n'; fi
