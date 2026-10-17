@@ -1,5 +1,7 @@
 # collector
 
+毎日の収集は `scripts/collect_daily.sh` を実行します。銘柄一覧を読み、取得した CSV を SQL Server の `prices_raw` に取り込んでから `prices` に重複なく追加し、標準出力と `logs/` に結果だけを記録します。
+
 J-Quants API（V2）から日足を取得する。株価の値とキーは出力しない。
 
 ## 準備
