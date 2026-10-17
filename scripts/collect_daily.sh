@@ -94,7 +94,13 @@ for code in "${codes[@]}"; do
 
   fetched=$(($(wc -l < "$csv") - 1))
   load_status=0
-  docker cp "$csv" "mssql:/tmp/bars_${code}.csv" >/dev/null 2>&1 || load_status=$?
+  # BULK INSERT は列の位置で入れるので、見出しが想定と違えば取り込まない（値が別の列に静かに入るのを防ぐ）
+  header=$(head -n 1 "$csv")
+  if [[ ${header%$'\r'} != "Date,Code,O,H,L,C,UL,LL,Vo,Va,AdjFactor,AdjO,AdjH,AdjL,AdjC,AdjVo,MktCap,ExRT" ]]; then
+    load_status=4
+  else
+    docker cp "$csv" "mssql:/tmp/bars_${code}.csv" >/dev/null 2>&1 || load_status=$?
+  fi
   if ((load_status == 0)); then
     load_query="TRUNCATE TABLE prices_raw; BULK INSERT prices_raw FROM '/tmp/bars_${code}.csv' WITH (FIRSTROW = 2, FIELDTERMINATOR = ',', ROWTERMINATOR = '0x0a'); INSERT INTO prices (code, trade_date, open_price, high_price, low_price, close_price, volume) SELECT r.Code, CAST(r.[Date] AS DATE), CAST(r.O AS DECIMAL(12,2)), CAST(r.H AS DECIMAL(12,2)), CAST(r.L AS DECIMAL(12,2)), CAST(r.C AS DECIMAL(12,2)), CAST(CAST(r.Vo AS DECIMAL(20,2)) AS BIGINT) FROM prices_raw r WHERE NOT EXISTS (SELECT 1 FROM prices p WHERE p.code = r.Code AND p.trade_date = CAST(r.[Date] AS DATE)); SELECT @@ROWCOUNT;"
     inserted=$(run_sql "$load_query" 2>/dev/null) || load_status=$?

@@ -52,7 +52,11 @@ case "$1" in
     if [[ ${FAKE_FETCH_FAIL_CODE:-} == 25590 && $* == *'25590'* ]]; then exit 7; fi
     save_path=${*: -1}
     mkdir -p "$(dirname "$save_path")"
-    printf 'Date,Code,O,H,L,C,UL,LL,Vo,Va,AdjFactor,AdjO,AdjH,AdjL,AdjC,AdjVo,MktCap,ExRT\n' > "$save_path"
+    if [[ ${FAKE_BAD_HEADER:-0} == 1 ]]; then
+      printf 'Date,Code,Vo,O,H,L,C\n' > "$save_path"
+    else
+      printf 'Date,Code,O,H,L,C,UL,LL,Vo,Va,AdjFactor,AdjO,AdjH,AdjL,AdjC,AdjVo,MktCap,ExRT\n' > "$save_path"
+    fi
     ;;
 esac
 FAKE_DOCKER
@@ -100,6 +104,10 @@ assert_contains "$test_root/fetch_fail.out" '^12340 fetched=0 inserted=1$'
 export FAKE_LOAD_FAIL=1
 run_case load_fail $'25590\n12340' 1
 unset FAKE_LOAD_FAIL
+export FAKE_BAD_HEADER=1
+run_case bad_header $'25590' 1
+unset FAKE_BAD_HEADER
+assert_contains "$test_root/bad_header.out" '^25590 FAILED stage=load exit=4$'
 assert_contains "$test_root/load_fail.out" '^25590 FAILED stage=load exit=8$'
 assert_contains "$test_root/load_fail.out" '^12340 FAILED stage=load exit=8$'
 
