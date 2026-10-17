@@ -86,7 +86,7 @@ run_case() {
   set -e
   assert_status "$status" "$expected"
   log_file="$test_root/logs/collect-$(date +%Y%m%d).log"
-  if grep -Ev '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4} (START|[0-9A-Z]+ fetched=[0-9]+ inserted=[0-9]+|[0-9A-Z]+ FAILED stage=(fetch|load) exit=[0-9]+|total rows=[0-9]+|END exit=[0-9]+|no codes in collector/codes.txt|mssql not ready)$' "$log_file" | grep -q .; then
+  if grep -Ev '^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}[+-][0-9]{4} (START|[0-9A-Z]+ fetched=[0-9]+ inserted=[0-9]+|[0-9A-Z]+ FAILED stage=(fetch|load) exit=[0-9]+|total rows=[0-9]+|END exit=[0-9]+|no codes in collector/codes.txt|invalid line in collector/codes.txt|mssql not ready)$' "$log_file" | grep -q .; then
     return 1
   fi
   assert_not_contains "$log_file" 'PRICE-[0-9.]+'
@@ -117,6 +117,10 @@ assert_contains "$test_root/bad_header.out" '^25590 FAILED stage=load exit=4$'
 assert_contains "$test_root/load_fail.out" '^25590 FAILED stage=load exit=8$'
 assert_contains "$test_root/load_fail.out" '^12340 FAILED stage=load exit=8$'
 
+run_case invalid_line $'BAD!\n25590' 1
+assert_contains "$test_root/invalid_line.out" '^invalid line in collector/codes.txt$'
+assert_contains "$test_root/invalid_line.out" '^25590 fetched=0 inserted=1$'
+assert_not_contains "$test_root/invalid_line.out" 'BAD!'
 run_case no_codes $'\n# ignored' 2
 assert_contains "$test_root/no_codes.out" '^no codes in collector/codes.txt$'
 

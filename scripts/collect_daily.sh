@@ -54,10 +54,16 @@ if ((ready == 0)); then
 fi
 
 codes=()
+invalid_lines=0
 while IFS= read -r code || [[ -n $code ]]; do
   code=${code%$'\r'}
   [[ -z ${code//[[:space:]]/} || $code == \#* ]] && continue
-  codes+=("$code")
+  # fetch_one と同じ形だけ受け付ける（それ以外の文字列を画面やログに出さないため）
+  if [[ $code =~ ^[0-9A-Z]{4,5}$ ]]; then
+    codes+=("$code")
+  else
+    invalid_lines=$((invalid_lines + 1))
+  fi
 done < collector/codes.txt
 
 if ((${#codes[@]} == 0)); then
@@ -77,6 +83,10 @@ if ! run_sql "$schema_query" >/dev/null; then
 fi
 
 failed=0
+if ((invalid_lines > 0)); then
+  emit 'invalid line in collector/codes.txt'
+  failed=1
+fi
 first=1
 for code in "${codes[@]}"; do
   if ((first == 0)); then

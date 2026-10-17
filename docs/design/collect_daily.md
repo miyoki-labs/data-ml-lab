@@ -45,6 +45,7 @@ START
 total rows=<数>
 END exit=<数>
 no codes in collector/codes.txt
+invalid line in collector/codes.txt
 mssql not ready
 ```
 
