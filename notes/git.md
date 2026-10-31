@@ -1,6 +1,6 @@
 # Git・GitHub
 
-2026-09-30〜の PR の流れと、Learn Git Branching（2026-10-03・10-04）で学んだこと。
+2026-09-30〜の PR の流れと、Learn Git Branching（2026-10-03・10-04・10-31）と、手元での再現（2026-10-31）で学んだこと。
 
 ## 用語・コマンド
 
@@ -43,9 +43,11 @@
 | `git push` | 自分のコミットを GitHub へ送る |
 | `git fetch --prune` | GitHub でもう消えたブランチのメモを掃除する |
 | `git ls-remote --heads origin` | メモではなく **GitHub に直接**ブランチを聞く |
+| `git init --bare 名前.git` | **作業フォルダの無い、保管専用**のリポジトリを作る。みんなが push してくる共有の倉庫で、中で直接編集しない（push とぶつかるため）。GitHub の中にあるのもこの形 |
 
 - `git status -sb` の1行目 `## main...origin/main [ahead 13, behind 7]`＝手元が13先、GitHub が7先＝**分岐（diverged）**
 - `non-fast-forward`＝GitHub が先に進んでいるのに、古いメモのまま push しようとした
+- `A && B`＝A が成功したら B を実行する（シェルのつなぎ。Git の機能ではない）
 - `git branch -a` の色：緑＝手元のブランチ、赤＝GitHub 側のメモ。`*`＝今ここ、`+`＝別の作業フォルダ（worktree）で使用中
 
 ### プルリクエスト（PR）
@@ -57,6 +59,30 @@
 
 - 名前の由来＝「私のリポジトリのブランチを、あなたの方から pull してください」というお願い
 - squash マージ＝ブランチのコミットを1つにまとめて main に載せる（このリポジトリは「PR 1本＝main の1行」）
+
+## 出力の見方
+
+見るのは **3 種類だけ**。
+
+1. `[ブランチ ハッシュ] メッセージ`＝commit ができた証拠
+2. `To …`／`From …` の下の **`古い..新しい`** の行＝何がどこからどこへ動いたか
+3. `error:`／`hint:`＝問題と対処（hint は対処法をそのまま書いてくれている）
+
+**読み飛ばしてよい**：`Enumerating`／`Counting`／`Compressing`／`Writing objects`（送信の進捗）、`LF will be replaced by CRLF`（Windows の改行コードの自動変換の注意）、`You appear to have cloned an empty repository`（空の倉庫を clone した＝作りたてなら当然）。
+
+| 出力 | 意味 |
+|---|---|
+| `[master (root-commit) dfaf6e4] C1` | master で commit した。`root-commit`＝履歴の最初。`dfaf6e4`＝commit の ID（パズルの C1） |
+| `1 file changed, 1 insertion(+)` | 1 ファイル、1 行増えた |
+| `create mode 100644 a.txt` | 新しいファイルができた（100644＝ふつうのファイル） |
+| `* [new branch] HEAD -> master` | 今いる場所を、相手側に master という**新しいブランチとして**作った |
+| `branch 'master' set up to track 'origin/master'` | master と origin/master が組になった（`push -u` の効果）。次から `git push` だけで送れる |
+| `* [new branch] master -> origin/master`（From の下） | 相手の master を取ってきて、手元に origin/master（パズルの o/main）として置いた |
+| `dfaf6e4..cdcfd88 master -> master` | **一番大事**。master が dfaf6e4 から cdcfd88 へ進んだ |
+| `! [rejected] master -> master (fetch first)` | `!`＝失敗。相手に知らない commit がある＝先に取ってきて |
+| `Successfully rebased and updated refs/heads/master.` | 自分の commit を積み直した。`refs/heads/master`＝手元の master の正式名 |
+
+`git log --oneline --graph --all` の読み方＝**上が新しく下が古い**（パズルの図の上下逆）。`*` が commit 1 つ、`( )` の中がラベル。`HEAD -> master, origin/master` が同じ行＝パズルで `main*` と `o/main` が同じ丸に付いている状態。
 
 ## つまずいたところ
 
@@ -73,6 +99,9 @@
 | 10/10 | 1週間空いたら `-f` と `-b` が何だったか分からなくなった | `-f`＝force（強制）。`branch -f` は手元の名札を動かすだけ（安全）、`push -f` は GitHub の履歴を上書き（危険）。`checkout -b 枝`＝枝を作って移る（b＝branch。`switch -c` も同じ） |
 | 10/10 | 同じ箇所を編集していたら、あとから rebase したほうに上書きされる？ | 上書きされない。同じ行がぶつかると rebase が**止まる**（コンフリクト）。`<<<<<<<` と `>>>>>>>` の間を直して `git add` → `git rebase --continue`、やめるなら `--abort`。Learn Git Branching はファイルの中身を持たないので起きない |
 | 9/30 | `git update-index --chmod=+x` のあと pathspec 付きで commit すれば実行権限が入る | pathspec 付きの commit は HEAD から取り直すので落ちる。`git commit -i -- <file>` を使い、`git ls-tree HEAD` で**commit の中身**を確かめる |
+| 10/31 | `git init --bare` が何をしているか分からない | 作業フォルダの無い共有倉庫を作る。GitHub の中身と同じ形なので、PC の中に小さな GitHub を作れる |
+| 10/31 | パズルは分かるが実務のイメージが湧かない | side＝PR のブランチ、リモートに増えた C8＝スマホや夜間タスクなど**自分以外**が入れた変更、push を断られる＝実際に起きる場面。手で打つ merge は実務ではほとんど GitHub の Merge ボタンが代わりにやる |
+| 10/31 | rebase しても commit は同じもの | rebase の前後でハッシュが変わる（`f687ffd` → `1a877b3`）。親が変わると別の commit として作り直される＝パズルの `C2'` の `'` の正体 |
 
 ## 使い道
 
@@ -81,3 +110,20 @@
 - **分岐は避けきれない**：小さく commit してこまめに push、ブランチは短く使ってすぐ PR → マージ＝小さいうちに合わせる
 - **直すとき**：push 済みなら revert、まだなら rebase -i や reset
 - **表示がおかしいとき**：メモ（`git branch -a`）ではなく実物（`git ls-remote`）を見る
+
+### 手元で再現する練習（`~/git-lab`・15〜20 分）
+
+GitHub を使わず PC の中だけで「自分・他の人・倉庫」を作り、push を断られる → 立て直す、を再現する。Git Bash で 1 行ずつ。
+
+```bash
+mkdir ~/git-lab && cd ~/git-lab && git init --bare remote.git && git clone remote.git me && git clone remote.git other
+cd ~/git-lab/me && echo "a" > a.txt && git add a.txt && git commit -m "C1" && git push -u origin HEAD
+cd ~/git-lab/other && git pull && echo "b" > b.txt && git add b.txt && git commit -m "C8 by other" && git push
+cd ~/git-lab/me && echo "c" > c.txt && git add c.txt && git commit -m "C2 by me" && git push
+git pull --rebase && git push
+git log --oneline --graph --all
+```
+
+- 4 行目で `[rejected]` が出る（パズルでリモートに C8 があった状態）。5 行目で立て直す。
+- 6 行目で一直線に並べば rebase が効いている。5 行目を `git pull`（`--rebase` なし）にすると合流点ができる。
+- やり直すときは `rm -rf ~/git-lab` で消してから 1 行目へ。
