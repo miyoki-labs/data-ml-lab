@@ -125,5 +125,6 @@ git log --oneline --graph --all
 ```
 
 - 4 行目で `[rejected]` が出る（パズルでリモートに C8 があった状態）。5 行目で立て直す。
-- 6 行目で一直線に並べば rebase が効いている。5 行目を `git pull`（`--rebase` なし）にすると合流点ができる。
+- 6 行目で一直線に並べば rebase が効いている。5 行目を `git pull --no-rebase` にすると合流点ができる（`--no-rebase` を付けないと `pull.rebase` の設定しだいで rebase になることがある）。
 - やり直すときは `rm -rf ~/git-lab` で消してから 1 行目へ。
+- 3 行目の `git pull` が `There is no tracking information` で止まったら、`git pull origin master` と `git push -u origin HEAD` に置き換える（Git 2.49 では空の倉庫の clone でも追跡先が設定され、そのまま通った）。
