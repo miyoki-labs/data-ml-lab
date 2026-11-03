@@ -13,11 +13,11 @@
 
 ## API の使い方
 
-出典＝公式の OpenWonderLabs/SwitchBotAPI（2026-11-03 確認）。
+出典＝公式の OpenWonderLabs/SwitchBotAPI（GitHub：https://github.com/OpenWonderLabs/SwitchBotAPI・2026-11-03 確認）。
 
 | 項目 | 内容 |
 |---|---|
-| ハブ2に使える操作 | 一覧の取得（List）・状態の取得（Status）・Webhook。**コマンド（操作の送信）は使えない**＝見るだけ |
+| ハブ2に使える操作 | 一覧の取得（List）・状態の取得（Status）・Webhook。**コマンド（操作の送信）は使えない**＝見るだけ（公式の README にある対応表で確認。⚠️ 仕様は更新されうる＝買う前に同じ表をもう一度見る） |
 | 使える回数 | 1日あたり 10,000 回まで（個人利用） |
 | 認証 | Open Token ＋ secret の2つ。リクエストのヘッダーに `Authorization`（トークン）・`sign`・`t`・`nonce` を付ける |
 | `sign` の作り方 | `token + t + nonce` を、secret を鍵にして HMAC-SHA256 で署名したもの。`t` は 13 桁のミリ秒の時刻、`nonce` は毎回変える文字列 |
@@ -31,7 +31,7 @@
 
 「ハブ2の温度・湿度を **1日1回** 取って、SQL Server の表に1行足す」。
 
-1. 状態の取得（Status）で、温度・湿度・明るさ・取った時刻を JSON で受け取る
+1. 状態の取得（Status）で、温度・湿度・明るさを JSON で受け取る。⚠️ Status の応答に時刻の項目があるかは未確認（`timeOfSample` は Webhook の項目）＝無ければ、取った時刻は自分のスクリプトで記録する
 2. SQL Server に表（例：`room_climate`＝取った時刻・温度・湿度・明るさ）を作る
 3. 取った値を `INSERT` する。株価の収集と同じく、同じ時刻を二重に入れない仕掛けを先に決める
 4. 動いたら、`GROUP BY` で日ごとの平均を出してみる（SQL の練習にもなる）
