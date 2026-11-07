@@ -1,6 +1,6 @@
 # SQL
 
-Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MySQL（XAMPP）との違いを試したこと。10/11 に `WHERE`・`ORDER BY`・`GROUP BY`・`INSERT`・`UPDATE`。
+Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MySQL（XAMPP）との違いを試したこと。10/11 に `WHERE`・`ORDER BY`・`GROUP BY`・`INSERT`・`UPDATE`。11/7 に `JOIN`。
 
 ## 用語・コマンド
 
@@ -27,6 +27,20 @@ Phase1 の入口（2026-10-07）。SQL Server 2022 を Docker で立てて、MyS
 | `UPDATE study_log SET minutes = 45 WHERE id = 4` | 行を書き換える。**WHERE を忘れると全部の行が変わる** |
 | `sq -d lab -Q "..."` | `-d`＝使う DB（database）、`-Q`＝この SQL を実行して終わる（小文字の `-q` は実行後も残る） |
 
+### JOIN（2つの表を日付でつなぐ・11/7）
+
+| 書き方 | 一言でいうと |
+|---|---|
+| `FROM trading_calendar AS c INNER JOIN prices AS p ON p.trade_date = c.trade_date` | 両方に相手がいる行だけ残す。相手のいない行は黙って落ちる（カレンダー 500 日 × prices 503 行 → 500 行） |
+| `LEFT JOIN` | 左の行は全部残す。右に相手がいなければ、右側の列が `NULL` になる |
+| `WHERE 右.キー IS NULL` | 相手がいない行だけ拾う。`= NULL` では拾えない（`NULL` は「不明」なので、`=` で比べると常に真にならない） |
+
+- 型＝「あるはずの表を左に置く → `ON` で結ぶ列を決める → 拾いたい行を `IS NULL` で決める」
+- 左右を逆にすると、`NULL` が出る側が変わる。カレンダーを左にした欠け探しは 0 件、prices を左にすると 8/12〜14 の 3 日が `NULL` で出た（カレンダーを 8/10 で区切ったため。欠けではない）
+- 銘柄が増えると、`INNER JOIN` の件数は銘柄の数だけ増える。`AND p.code = '…'` を足して、銘柄ごとに数える
+- `NOT EXISTS`（前回の欠け探し）と `LEFT JOIN … IS NULL` は、同じ答えが出る別の書き方
+- 練習用の表は Docker の DB の中だけ（trading_calendar・market_holidays）。リポジトリには保存していない
+
 ### MySQL（XAMPP）との違い
 
 | やりたいこと | MySQL | SQL Server |
@@ -52,6 +66,7 @@ alias sq='docker exec -i mssql bash -c "/opt/mssql-tools18/bin/sqlcmd -S localho
 
 | 日付 | 最初の理解 | 正しい理解 |
 |---|---|---|
+| 11/7 | `LEFT JOIN` すると、`NULL` が必ず出る | `NULL` は「右に相手がいない行」にだけ出る。カレンダーを左にした今回は欠けが 0 件なので、`NULL` は 1 つも出なかった（それが正しい結果）。`NULL` を見たいときは左右を逆にする |
 | 10/7 | alias の中で `bin\sqlcmd` と打ったら `binsqlcmd: no such file` | alias の中身は使うときにもう一度シェルが読み直す。そのとき `\s` の `\` は消費されて消える。長いコマンドは手で打たずにコピーし、`alias sq` で中身を確かめる |
 | 10/11 | 「30分より長い日を、日付の新しい順に」を `WHERE minutes >= 30 ORDER BY minutes DESC` と書いた | SQL の形は正しい。お題の読み取りが2か所違った＝「より長い」は `>`、「日付の新しい順」は `ORDER BY study_date DESC` |
 | 10/11 | `-d` と `-Q` は「そういうもの」として打っていた | `sq` は別名で、中身は `sqlcmd -S localhost -U sa -P ... -C`。`-d lab`＝lab の中で、`-Q`＝この SQL を実行して終わる |
