@@ -198,6 +198,11 @@ class FetchOneTest(unittest.TestCase):
             finally:
                 os.chdir(old_cwd)
 
+    def test_missing_date_is_other_error(self):
+        status, _, err = self.run_main(FakeGet(ok([{"Code": "25590"}])))
+        self.assertEqual(status, fetch_one.EXIT_OTHER)
+        self.assertIn("応答に日付が無い", err)
+
     def test_save_output_does_not_contain_price_values(self):
         with tempfile.TemporaryDirectory() as directory:
             old_cwd = os.getcwd()

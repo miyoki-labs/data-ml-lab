@@ -1,0 +1,39 @@
+name: ci
+
+# PR と main への push で、テストと lint を走らせる。
+# 必須チェックにする名前は「test」と「lint」（ブランチ保護で指定する）。
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13" # Dockerfile と同じ版
+      - name: Python のテスト（標準の unittest・外部ライブラリなし）
+        run: python -m unittest discover -s tests -t . -v
+      - name: シェルのテスト
+        run: bash tests/test_collect_daily.sh
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: ruff（既定のルール＝構文エラーと未使用などの明らかな誤り）
+        run: |
+          pip install ruff==0.8.6
+          ruff check .
+      - name: shellcheck（ubuntu-latest に入っている）
+        run: shellcheck scripts/*.sh tests/*.sh

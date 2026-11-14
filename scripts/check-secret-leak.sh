@@ -14,7 +14,7 @@ while (($#)); do
   case "$1" in
     --key-file | --root)
       if (($# < 2)); then echo "$1 に値が無い" >&2; exit 2; fi
-      [[ $1 == --key-file ]] && key_file=$2 || root=$2
+      if [[ $1 == --key-file ]]; then key_file=$2; else root=$2; fi
       shift 2
       ;;
     --selftest) selftest=1; shift ;;
