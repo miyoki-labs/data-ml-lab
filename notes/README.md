@@ -10,6 +10,7 @@
 - [sql.md](sql.md) — SQL（SQL Server を Docker で立てる・MySQL との違い・WHERE／ORDER BY／GROUP BY）
 - [aws.md](aws.md) — AWS（AWS Certified AI Practitioner：練習問題の結果・サービス名・機械学習の基礎・業務への使い道）
 - [iot.md](iot.md) — IoT（SwitchBot ハブ2で温湿度を取って SQL Server に貯める：API の使い方・最初の課題。まだ動かしていない）
+- [system-reading.md](system-reading.md) — システムの読み方と AI の使い分け（9領域の地図・考え方10個・AWS の図の読み方・CI の観点・会話とモデルの分け方。「確かめていないこと」を分けて書く）
 - [materials.md](materials.md) — 教材リスト（資格の勉強と作業を兼ねられるもの。この1つだけは「用語・つまずき・使い道」ではなく教材の一覧）
 
 ## 書き方
