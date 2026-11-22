@@ -25,7 +25,7 @@ cd C:/GitPractice/work
 git branch backup/before-rebase
 
 # 2. origin の上に乗せ直す。二重は自動で飛ばされ、追跡中ファイルの未コミットの変更は一時退避→元に戻る
-#    （未追跡の新規ファイルは退避の対象外＝そもそも動かない）
+#    （未追跡の新規ファイルは退避の対象外。同名のファイルが origin 側に無ければそのまま残る）
 git pull --rebase --autostash
 ```
 
@@ -40,7 +40,7 @@ Applied autostash.
 Successfully rebased and updated refs/heads/main.
 ```
 
-`skipped previously applied commit` が「二重を外した」印。`Created autostash` と `Applied autostash` が対になっていれば、追跡中ファイルの未コミットの変更（ここでは `notes.md`）も戻っています。`scratch.txt` のような**未追跡**のファイルは autostash の対象外なので、最初から作業ツリーに残ったままです（rebase では動かない）。
+`skipped previously applied commit` が「二重を外した」印。`Created autostash` と `Applied autostash` が対になっていれば、追跡中ファイルの未コミットの変更（ここでは `notes.md`）も戻っています。`scratch.txt` のような**未追跡**のファイルは autostash の対象外なので、退避も復元もされず作業ツリーに残ったままです（この練習場では origin に同名のファイルが無いので動きません）。⚠️ 乗せる側の commit が**同名のファイルを追加している**と、上書きを防ぐために rebase が途中で止まります。その場合は、先に未追跡のファイルを別の場所へ移してからやり直します。
 
 ### 確かめる（3 点）
 
