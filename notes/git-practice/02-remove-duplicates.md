@@ -24,7 +24,8 @@ cd C:/GitPractice/work
 # 1. 退避の印（戻れる目印）。作業は進まない・ただの別名
 git branch backup/before-rebase
 
-# 2. origin の上に乗せ直す。二重は自動で飛ばされ、未コミットは一時退避→元に戻る
+# 2. origin の上に乗せ直す。二重は自動で飛ばされ、追跡中ファイルの未コミットの変更は一時退避→元に戻る
+#    （未追跡の新規ファイルは退避の対象外＝そもそも動かない）
 git pull --rebase --autostash
 ```
 
@@ -39,7 +40,7 @@ Applied autostash.
 Successfully rebased and updated refs/heads/main.
 ```
 
-`skipped previously applied commit` が「二重を外した」印。`Created autostash` と `Applied autostash` が対になっていれば、未コミットの変更も戻っています。
+`skipped previously applied commit` が「二重を外した」印。`Created autostash` と `Applied autostash` が対になっていれば、追跡中ファイルの未コミットの変更（ここでは `notes.md`）も戻っています。`scratch.txt` のような**未追跡**のファイルは autostash の対象外なので、最初から作業ツリーに残ったままです（rebase では動かない）。
 
 ### 確かめる（3 点）
 
@@ -60,7 +61,7 @@ git range-diff backup/before-rebase~1..backup/before-rebase origin/main..main   
 ```
 
 読み方：
-- ① `ahead 1`（二重の分が消えた）。`M notes.md` と `?? scratch.txt` は前と同じ＝未コミットは無事。
+- ① `ahead 1`（二重の分が消えた）。`M notes.md` と `?? scratch.txt` は前と同じ＝未コミット（追跡中の変更）も未追跡のファイルも無事。
 - ② `+` が 1 本だけ ＝ 残ったのは自分の変更。`-` が 0 本なので二重はもう無い。
 - ③ `=` ＝ 退避の枝の 1 件と、rebase 後の 1 件は**中身が同じ**（ハッシュだけが変わった：`51fbc7b` → `16f6fc9`。rebase 後のハッシュは実行するたびに変わります）。
 
