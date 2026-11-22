@@ -21,3 +21,4 @@ logs/
 
 # Obsidian の設定（notes/ を保管庫として開いたときにできる）
 .obsidian/
+graphify-out/
